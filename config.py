@@ -21,13 +21,18 @@ DEFAULT_SAFETY_SETTINGS = [
 
 # Helper function to get base model name from any variant
 def get_base_model_name(model_name):
-    """Convert variant model name to base model name."""
-    # Remove all possible suffixes in order
+    base_name = get_base_model_from_feature_model(model_name) # 先剥离 "假流式/" 等前缀
     suffixes = ["-maxthinking", "-nothinking", "-search"]
-    for suffix in suffixes:
-        if model_name.endswith(suffix):
-            return model_name[:-len(suffix)]
-    return model_name
+    
+    stripped = True
+    while stripped: # 关键：使用循环持续剥离
+        stripped = False
+        for suffix in suffixes:
+            if base_name.endswith(suffix):
+                base_name = base_name[:-len(suffix)]
+                stripped = True # 成功剥离，再来一轮检查
+            
+    return base_name
 
 # Helper function to check if model uses search grounding
 def is_search_model(model_name):
@@ -193,6 +198,7 @@ def get_available_models(router_type="openai"):
     Returns:
         List of model names with feature prefixes
     """
+    all_thinking_suffixes = ["-maxthinking", "-nothinking", "-search", "-search-maxthinking", "-search-nothinking"]
     models = []
     
     for base_model in BASE_MODELS:
@@ -208,16 +214,25 @@ def get_available_models(router_type="openai"):
         # 流式抗截断模型 (仅在流式传输时有效，前缀格式)
         models.append(f"流式抗截断/{base_model}")
         
-        # 支持thinking模式后缀与功能前缀组合
-        for thinking_suffix in ["-maxthinking", "-nothinking", "-search"]:
+        # 4. 根据模型名称决定要添加的后缀列表
+        suffixes_to_add = []
+        if "flash" in base_model:
+            # 如果是 flash 模型，只添加 "-search"
+            suffixes_to_add = ["-search"]
+        elif "pro" in base_model:
+            # 如果是 pro 模型，添加所有可能的后缀组合
+            suffixes_to_add = all_thinking_suffixes
+        
+        # 5. 遍历确定的后缀列表，生成所有组合模型名称
+        for suffix in suffixes_to_add:
             # 基础模型 + thinking后缀
-            models.append(f"{base_model}{thinking_suffix}")
+            models.append(f"{base_model}{suffix}")
             
             # 假流式 + thinking后缀
-            models.append(f"假流式/{base_model}{thinking_suffix}")
+            models.append(f"假流式/{base_model}{suffix}")
             
             # 流式抗截断 + thinking后缀
-            models.append(f"流式抗截断/{base_model}{thinking_suffix}")
+            models.append(f"流式抗截断/{base_model}{suffix}")
     
     return models
 
