@@ -18,4 +18,4 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         # 这是您需要使用的最终版本
         run: |
-          git push "https://huggingface:${HF_TOKEN}@huggingface.co/spaces/lusihe/hugkiki" --force master
+          git push "https://huggingface:${HF_TOKEN}@huggingface.co/spaces/lusihe/kikiya" --force master
