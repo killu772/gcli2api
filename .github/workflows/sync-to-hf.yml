@@ -2,7 +2,7 @@ name: Sync to Hugging Face Hub
 
 on:
   push:
-    branches: [ main ] # 只有当 main 分支有更新时才触发
+    branches: [ master ] # 只有当 main 分支有更新时才触发
 
 jobs:
   sync-to-hub:
