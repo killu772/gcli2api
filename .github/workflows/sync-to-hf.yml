@@ -1,0 +1,21 @@
+name: Sync to Hugging Face Hub
+
+on:
+  push:
+    branches: [ main ] # 只有当 main 分支有更新时才触发
+
+jobs:
+  sync-to-hub:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          lfs: true
+
+      - name: Push to Hub
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        # 这是您需要使用的最终版本
+        run: |
+          git push "https://huggingface:${HF_TOKEN}@huggingface.co/spaces/lusihe/hugkiki" --force main
